@@ -1,0 +1,233 @@
+   1pt.   2pts.   3pts.   5pts.   8pts.
+      2      21      55     153     439
+      2      72      25      29        
+      2     213      53     146        
+      5      92      50      95        
+      2      92      92     499        
+      2       2     115                
+     25       2       2                
+     29       2      27                
+      4       2     166                
+      2       2      26                
+     90       2      47                
+     95       4      27                
+      3       4     288                
+      2       7      46                
+      2      50     104                
+      2       7                        
+      2       7                        
+      2     152                        
+      3      25                        
+      4       6                        
+      3       4                        
+     22      25                        
+      2     460                        
+      2     169                        
+      2      21                        
+      2     201                        
+      2      68                        
+     20      26                        
+      4       2                        
+    NaN     121                        
+
+
+(ses-cell A1 "1pt." nil nil nil)
+(ses-cell B1 "2pts." nil nil nil)
+(ses-cell C1 "3pts." nil nil nil)
+(ses-cell D1 "5pts." nil nil nil)
+(ses-cell E1 "8pts." nil nil nil)
+
+(ses-cell A2 2 nil nil nil)
+(ses-cell B2 21 nil nil nil)
+(ses-cell C2 55 nil nil nil)
+(ses-cell D2 153 nil nil nil)
+(ses-cell E2 439 nil nil nil)
+
+(ses-cell A3 2 nil nil nil)
+(ses-cell B3 72 nil nil nil)
+(ses-cell C3 25 nil nil nil)
+(ses-cell D3 29 nil nil nil)
+(ses-cell E3 nil nil nil nil)
+
+(ses-cell A4 2 nil nil nil)
+(ses-cell B4 213 nil nil nil)
+(ses-cell C4 53 nil nil nil)
+(ses-cell D4 146 nil nil nil)
+(ses-cell E4 nil nil nil nil)
+
+(ses-cell A5 5 nil nil nil)
+(ses-cell B5 92 nil nil nil)
+(ses-cell C5 50 nil nil nil)
+(ses-cell D5 95 nil nil nil)
+(ses-cell E5 nil nil nil nil)
+
+(ses-cell A6 2 nil nil nil)
+(ses-cell B6 92 nil nil nil)
+(ses-cell C6 92 nil nil nil)
+(ses-cell D6 499 nil nil nil)
+(ses-cell E6 nil nil nil nil)
+
+(ses-cell A7 2 nil nil nil)
+(ses-cell B7 2 nil nil nil)
+(ses-cell C7 115 nil nil nil)
+(ses-cell D7 nil nil nil nil)
+(ses-cell E7 nil nil nil nil)
+
+(ses-cell A8 25 nil nil nil)
+(ses-cell B8 2 nil nil nil)
+(ses-cell C8 2 nil nil nil)
+(ses-cell D8 nil nil nil nil)
+(ses-cell E8 nil nil nil nil)
+
+(ses-cell A9 29 nil nil nil)
+(ses-cell B9 2 nil nil nil)
+(ses-cell C9 27 nil nil nil)
+(ses-cell D9 nil nil nil nil)
+(ses-cell E9 nil nil nil nil)
+
+(ses-cell A10 4 nil nil nil)
+(ses-cell B10 2 nil nil nil)
+(ses-cell C10 166 nil nil nil)
+(ses-cell D10 nil nil nil nil)
+(ses-cell E10 nil nil nil nil)
+
+(ses-cell A11 2 nil nil nil)
+(ses-cell B11 2 nil nil nil)
+(ses-cell C11 26 nil nil nil)
+(ses-cell D11 nil nil nil nil)
+(ses-cell E11 nil nil nil nil)
+
+(ses-cell A12 90 nil nil nil)
+(ses-cell B12 2 nil nil nil)
+(ses-cell C12 47 nil nil nil)
+(ses-cell D12 nil nil nil nil)
+(ses-cell E12 nil nil nil nil)
+
+(ses-cell A13 95 nil nil nil)
+(ses-cell B13 4 nil nil nil)
+(ses-cell C13 27 nil nil nil)
+(ses-cell D13 nil nil nil nil)
+(ses-cell E13 nil nil nil nil)
+
+(ses-cell A14 3 nil nil nil)
+(ses-cell B14 4 nil nil nil)
+(ses-cell C14 288 nil nil nil)
+(ses-cell D14 nil nil nil nil)
+(ses-cell E14 nil nil nil nil)
+
+(ses-cell A15 2 nil nil nil)
+(ses-cell B15 7 nil nil nil)
+(ses-cell C15 46 nil nil nil)
+(ses-cell D15 nil nil nil nil)
+(ses-cell E15 nil nil nil nil)
+
+(ses-cell A16 2 nil nil nil)
+(ses-cell B16 50 nil nil nil)
+(ses-cell C16 104 nil nil nil)
+(ses-cell D16 nil nil nil nil)
+(ses-cell E16 nil nil nil nil)
+
+(ses-cell A17 2 nil nil nil)
+(ses-cell B17 7 nil nil nil)
+(ses-cell C17 nil nil nil nil)
+(ses-cell D17 nil nil nil nil)
+(ses-cell E17 nil nil nil nil)
+
+(ses-cell A18 2 nil nil nil)
+(ses-cell B18 7 nil nil nil)
+(ses-cell C18 nil nil nil nil)
+(ses-cell D18 nil nil nil nil)
+(ses-cell E18 nil nil nil nil)
+
+(ses-cell A19 2 nil nil nil)
+(ses-cell B19 152 nil nil nil)
+(ses-cell C19 nil nil nil nil)
+(ses-cell D19 nil nil nil nil)
+(ses-cell E19 nil nil nil nil)
+
+(ses-cell A20 3 nil nil nil)
+(ses-cell B20 25 nil nil nil)
+(ses-cell C20 nil nil nil nil)
+(ses-cell D20 nil nil nil nil)
+(ses-cell E20 nil nil nil nil)
+
+(ses-cell A21 4 nil nil nil)
+(ses-cell B21 6 nil nil nil)
+(ses-cell C21 nil nil nil nil)
+(ses-cell D21 nil nil nil nil)
+(ses-cell E21 nil nil nil nil)
+
+(ses-cell A22 3 nil nil nil)
+(ses-cell B22 4 nil nil nil)
+(ses-cell C22 nil nil nil nil)
+(ses-cell D22 nil nil nil nil)
+(ses-cell E22 nil nil nil nil)
+
+(ses-cell A23 22 nil nil nil)
+(ses-cell B23 25 nil nil nil)
+(ses-cell C23 nil nil nil nil)
+(ses-cell D23 nil nil nil nil)
+(ses-cell E23 nil nil nil nil)
+
+(ses-cell A24 2 nil nil nil)
+(ses-cell B24 460 nil nil nil)
+(ses-cell C24 nil nil nil nil)
+(ses-cell D24 nil nil nil nil)
+(ses-cell E24 nil nil nil nil)
+
+(ses-cell A25 2 nil nil nil)
+(ses-cell B25 169 nil nil nil)
+(ses-cell C25 nil nil nil nil)
+(ses-cell D25 nil nil nil nil)
+(ses-cell E25 nil nil nil nil)
+
+(ses-cell A26 2 nil nil nil)
+(ses-cell B26 21 nil nil nil)
+(ses-cell C26 nil nil nil nil)
+(ses-cell D26 nil nil nil nil)
+(ses-cell E26 nil nil nil nil)
+
+(ses-cell A27 2 nil nil nil)
+(ses-cell B27 201 nil nil nil)
+(ses-cell C27 nil nil nil nil)
+(ses-cell D27 nil nil nil nil)
+(ses-cell E27 nil nil nil nil)
+
+(ses-cell A28 2 nil nil nil)
+(ses-cell B28 68 nil nil nil)
+(ses-cell C28 nil nil nil nil)
+(ses-cell D28 nil nil nil nil)
+(ses-cell E28 nil nil nil nil)
+
+(ses-cell A29 20 nil nil nil)
+(ses-cell B29 26 nil nil nil)
+(ses-cell C29 nil nil nil nil)
+(ses-cell D29 nil nil nil nil)
+(ses-cell E29 nil nil nil nil)
+
+(ses-cell A30 4 nil nil nil)
+(ses-cell B30 2 nil nil nil)
+(ses-cell C30 nil nil nil nil)
+(ses-cell D30 nil nil nil nil)
+(ses-cell E30 nil nil nil nil)
+
+(ses-cell A31 "NaN" nil nil nil)
+(ses-cell B31 121 nil nil nil)
+(ses-cell C31 nil nil nil nil)
+(ses-cell D31 nil nil nil nil)
+(ses-cell E31 nil nil nil nil)
+
+(ses-column-widths [7 7 7 7 7])
+(ses-column-printers [nil nil nil nil nil])
+(ses-default-printer "%.7g")
+(ses-header-row 0)
+
+( ;Global parameters (these are read first)
+ 2 ;SES file-format
+ 31 ;numrows
+ 5 ;numcols
+)
+
+;; Local Variables:
+;; mode: ses
+;; End:
