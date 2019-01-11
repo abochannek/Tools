@@ -15,5 +15,5 @@ Notes
 - Each empty cell to the left of a fill cell needs to be invalid (e.g., with a `NaN` content) or the filled cell will be attributed to the wrong column; there should be an easier way to do this
 - The multiple histograms might be easier to compare if they used similar axis ranges
 
-![Cycle Time boxplot][cycle_time.png ?raw=true "Cycle Time boxplot"]
-![Cycle Time histogram][cycle_time.hist.png ?raw=true "Cycle Time histogram"]
+![Cycle Time boxplot](cycle_time.png?raw=true "Cycle Time boxplot")
+![Cycle Time histogram](cycle_time.hist.png?raw=true "Cycle Time histogram")
