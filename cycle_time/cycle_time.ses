@@ -14,7 +14,7 @@
       3       4     288                
       2       7      46                
       2      50     104                
-      2       7                        
+      2       7     272                
       2       7                        
       2     152                        
       3      25                        
@@ -129,7 +129,7 @@
 
 (ses-cell A17 2 nil nil nil)
 (ses-cell B17 7 nil nil nil)
-(ses-cell C17 nil nil nil nil)
+(ses-cell C17 272 nil nil nil)
 (ses-cell D17 nil nil nil nil)
 (ses-cell E17 nil nil nil nil)
 

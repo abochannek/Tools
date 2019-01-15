@@ -1,3 +1,4 @@
+set macros
 script=ARG0
 basename=script[:strstrt(script,'.')]
 header=system('head -1 '.basename.'ses')
@@ -5,7 +6,6 @@ points=words(header)
 datafile="< gsed -nE '{:loop; /^(\\f|$)/q; s/(^\\s+|\\s+$)//g; s/ +/,/g; p; n; b loop}' ".basename.'ses'
 set datafile separator comma
 
-# Cycle time boxplot
 set terminal pngcairo font 'arial,10' fontscale 1.5 size 800, 600
 outputfile=basename.'png'
 set output outputfile
@@ -15,8 +15,9 @@ set style data boxplot
 set style fill solid 0.5 border -1
 set style boxplot outliers pointtype 7
 set pointsize 0.5
+set errorbars lt black lw 1
 
-set title 'Cycle Time by Points'
+set title 'Cycle Time by Points' font 'arial,18'
 set ylabel "Hours\n(not incl. Acceptance)"
 set key autotitle columnhead
 unset key
@@ -26,47 +27,36 @@ set xtics ('' 0) nomirror scale 0
 set ytics nomirror
 set logscale y
 
-do for [column=1:points] {
+col_loop="for [column=1:points]"
+array tablefile[points]
+do @col_loop {
     stats datafile using column noout
-    set label column sprintf("{/:Italic M}=%dhrs.", STATS_median) at column,1 center
+    set label 1000+column sprintf("%i ".(STATS_records == 1 ? "Story" : "Stories"), \
+	STATS_records) at column,1000 center
+    set label 1+column sprintf("{/:Italic M}=%dhrs.", STATS_median) at column,1 center
+
+    tablefile[column]=system('mktemp -t '.basename.'kfile.'.column)
+    # The main datafile is a CSV with headers, so a fake header is
+    # necessary because of the autotitle.
+    # The separator option doesn't work, which is why a format string
+    # below is needed.
+    system('echo " x\t y" > '.tablefile[column])
+    set table tablefile[column] append
+    plot datafile u column:(1) smooth kdensity bandwidth 10. with filledcurves above y
+    unset table
 }
 
-plot for [column=1:*] datafile u(column):column:(0.5):(columnhead(column))
+set xrange[0:(points+1)]
 
-unset for [column=1:points] label column
-unset logscale y
+plot @col_loop tablefile[column] \
+     u(column + $2/1.5):1 '%lf %lf' with filledcurve x=column lt column, \
+     @col_loop tablefile[column] \
+     u(column - $2/1.5):1 '%lf %lf' with filledcurve x=column lt column, \
+     @col_loop datafile \
+     u(column):column:(0.075):(columnhead(column)) fc "white" lw 2
 
-
-# Cycle time histogram
-set terminal pngcairo font 'arial,10' fontscale 1.5 size 1600, 1200
-outputfile=basename.'hist.png'
-set output outputfile
-array Dim[2]=[0.0,0.0]
-Dim[1]=int(ceil(sqrt(points)))
-Dim[2]=int(ceil(points/real(Dim[1])))
-set multiplot layout Dim[1],Dim[2] title 'Frequency of Cycle Time'
-
-do for [column=1:points] {
-
-    stats datafile using column noout
-
-    binwidth=24 # hours
-    tics_freq=binwidth*(((ceil(STATS_max / binwidth))/10)+1)
-    
-    set title sprintf("%s\n%i ".(STATS_records == 1 ? "Story" : "Stories"), \
-	word(header,column), STATS_records)
-
-    set xrange [0:]
-    set xlabel 'Hours'
-    set xtics tics_freq font 'arial,8' 
-    
-    set format y '%0.f'
-    set ylabel 'Frequency'
-    
-    bin(x)=binwidth*floor(x/binwidth)+binwidth/2.0
-    set boxwidth binwidth*0.9
-    
-    plot datafile u(bin(stringcolumn(column))):(1.0) smooth freq with boxes lc column
+do @col_loop {
+    system('rm '.tablefile[column])
 }
 
-unset multiplot
+reset
