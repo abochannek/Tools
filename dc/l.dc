@@ -1,0 +1,199 @@
+# e(x)
+[ KSE 20k
+  sx
+  1 sa
+  10 sb
+  lb sc
+  1 sd
+  1 se
+  [lg 10 / p q] sR
+  [
+	lb lx * sb
+	lc la * lb + sc
+	ld la * sd
+	lc ld / sg
+	lg le =R
+	lg se
+	la 1 + sa
+	lFx
+  ] sF
+  lFx
+  LEk
+] sE
+
+# sin(X)
+[ KSS 20k
+  d sx
+  d _1 * * sy
+  3 sa
+  lx sb
+  lb sc
+  1 sd
+  1 se
+  [lg p q] sR
+  [
+	lb ly * sb
+	lc la d 1 - * * lb + sc
+	ld la d 1 - * * sd
+	lc ld / sg
+	lg le =R
+	lg se
+	la 2 + sa
+	lFx
+  ] sF
+  lFx
+  LSk
+] sS
+
+# cos(x)
+[ KSC 20k
+  d sx
+  d _1 * * sy
+  2 sa
+  1 sb
+  lb sc
+  1 sd
+  1 se
+  [lg p q] sR
+  [
+	lb ly * sb
+	lc la d 1 - * * lb + sc
+	ld la d 1 - * * sd
+	lc ld / sg
+	lg le =R
+	lg se
+	la 2 + sa
+	lFx
+  ] sF
+  lFx
+  LCk
+] sC
+
+#ln(x)
+[ KSL 20k
+  d sx
+  [ 1 10 K ^ - p q] sR
+  0 r !>R
+  K st
+  0 k
+  1 sf
+  lx ss
+  [ ls 10 / ss
+    lf 1 + sf
+    0 ls >W
+  ] sW
+  lWx
+  lf lt + k
+  1 sf
+  [ lx v sx
+    lf 2 * sf
+    2 lx >W
+  ] sW
+  lWx
+  [ lx v sx
+    lf 2 * sf
+    0.5 lx <W
+  ] sW
+  lWx
+  lx d 1 - r 1 + / su
+  lu d * ss
+  lf 2 * sb
+  lb sc
+  1 d sd se
+  [
+	lt k
+	lu lc * ld / p q
+  ] sR
+  3 sa
+  [
+	lb ls * sb
+	lc la * ld lb * + sc
+	ld la * sd
+	lc ld / sg
+	lg le =R
+	lg se
+	la 2 + sa
+	lFx
+  ] sF
+  lFx
+  LLk
+] sL
+
+#atan(x)
+[ KSA 20k
+  d sx
+  [ 0 p LAk q] sR
+  0 =R
+  K st
+  1 sf
+  [ K 1 + k
+    lx d d * 1 + v 1 r - r / _1 * sx
+    lf 2 * sf
+    0.5 lx >W
+  ] sW
+  lWx
+  [ K 1 + k
+    lx d d * 1 + v 1 r - r / _1 * sx
+    lf 2 * sf
+    _0.5 lx <W
+  ] sW
+  lWx
+  lx d _1 * * ss
+  lf d sb sc
+  1 d sd se
+  [
+	lt k
+	lx lc * ld / p q
+  ] sR
+  3 sa
+  [
+	lb ls * sb
+	lc la * ld lb * + sc
+	ld la * sd
+	lc ld / sg
+	lg le =R
+	lg se
+	la 2 + sa
+	lFx
+  ] sF
+  lFx
+  LAk
+] sA
+
+#j(n,x)
+[ KSJ 20k
+  sx sn
+  lx d _1 * * 4 / ss
+  [ _1 d
+    ln * sn
+    lx * sx
+  ] sN
+  0 ln <N
+  1 d sa sc
+  1 si
+  [
+	[q] sR
+	ln li >R
+	la lx * sa
+	lc 2 * li * sc
+	li 1 + si
+	lFx
+  ] sF
+  lFx
+  la sb
+  1 d sd se
+  [ lg p q ] sR
+  1 si
+  [
+	la ls * sa
+	li d ln + * lb * la + sb
+	li d ln + * lc * sc
+	lb lc / sg
+	lg le =R
+	lg se
+	li 1 + si
+	lFx
+  ] sF
+  lFx
+  LJk
+] sJ
