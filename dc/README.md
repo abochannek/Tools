@@ -7,4 +7,4 @@ Robert Morris and Lorinda Cherry owned the dc program at Bell Labs. In 1975 they
 
 ## l.dc
 
-Robert Morris included a math library to provide scientific functions for bc in 6th Edition Unix (1975.) Each library function uses an iterative approximation approach. This code is a line-by-line translation of the bc math library to dc. No effort has been made to preserve register content nor is this particularly idiomatic dc code.
+Robert Morris included a [math library](https://www.tuhs.org/cgi-bin/utree.pl?file=V6/usr/lib/lib.b) to provide scientific functions for bc in 6th Edition Unix (1975.) Each library function uses an iterative approximation approach. This code is a line-by-line translation of the bc math library to dc. No effort has been made to preserve register content nor is this particularly idiomatic dc code.
