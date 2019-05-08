@@ -12,9 +12,9 @@
      90       2      47      36        
      95       4      27     241        
       3       4     288     272        
-      2       7      46                
-      2      50     104                
-      2       7     331                
+      2       7      46     216        
+      2      50     104     725        
+      2       7     331     195        
       2       7     321                
       2     152     384                
       3      25       3                
@@ -33,11 +33,11 @@
       3      30     143                
       2     216      76                
       2      98     119                
-     72     165                        
-      3      93                        
-    122      19                        
-    190      96                        
-     56       4                        
+     72     165      27                
+      3      93       2                
+    122      19      75                
+    190      96     305                
+     56       4     657                
     196      51                        
      23      90                        
       3       2                        
@@ -45,8 +45,23 @@
       2       2                        
       2      26                        
       5       2                        
-    NaN     173                        
-    NaN       4                        
+      3     173                        
+      3       4                        
+      2     165                        
+     26      56                        
+      2     171                        
+     70       3                        
+     26       2                        
+      2      50                        
+    NaN     122                        
+    NaN      27                        
+    NaN     167                        
+    NaN       2                        
+    NaN      23                        
+    NaN      75                        
+    NaN      52                        
+    NaN     249                        
+    NaN      27                        
 
 
 (ses-cell A1 "1pt." nil nil nil)
@@ -136,19 +151,19 @@
 (ses-cell A15 2 nil nil nil)
 (ses-cell B15 7 nil nil nil)
 (ses-cell C15 46 nil nil nil)
-(ses-cell D15 nil nil nil nil)
+(ses-cell D15 216 (+ 142 74) nil nil)
 (ses-cell E15 nil nil nil nil)
 
 (ses-cell A16 2 nil nil nil)
 (ses-cell B16 50 nil nil nil)
 (ses-cell C16 104 nil nil nil)
-(ses-cell D16 nil nil nil nil)
+(ses-cell D16 725 (+ 640 85) nil nil)
 (ses-cell E16 nil nil nil nil)
 
 (ses-cell A17 2 nil nil nil)
 (ses-cell B17 7 nil nil nil)
 (ses-cell C17 331 nil nil nil)
-(ses-cell D17 nil nil nil nil)
+(ses-cell D17 195 nil nil nil)
 (ses-cell E17 nil nil nil nil)
 
 (ses-cell A18 2 nil nil nil)
@@ -261,31 +276,31 @@
 
 (ses-cell A36 72 nil nil nil)
 (ses-cell B36 165 (+ 146 19) nil nil)
-(ses-cell C36 nil nil nil nil)
+(ses-cell C36 27 nil nil nil)
 (ses-cell D36 nil nil nil nil)
 (ses-cell E36 nil nil nil nil)
 
 (ses-cell A37 3 nil nil nil)
 (ses-cell B37 93 nil nil nil)
-(ses-cell C37 nil nil nil nil)
+(ses-cell C37 2 nil nil nil)
 (ses-cell D37 nil nil nil nil)
 (ses-cell E37 nil nil nil nil)
 
 (ses-cell A38 122 nil nil nil)
 (ses-cell B38 19 nil nil nil)
-(ses-cell C38 nil nil nil nil)
+(ses-cell C38 75 nil nil nil)
 (ses-cell D38 nil nil nil nil)
 (ses-cell E38 nil nil nil nil)
 
 (ses-cell A39 190 (+ 69 121) nil nil)
 (ses-cell B39 96 nil nil nil)
-(ses-cell C39 nil nil nil nil)
+(ses-cell C39 305 nil nil nil)
 (ses-cell D39 nil nil nil nil)
 (ses-cell E39 nil nil nil nil)
 
 (ses-cell A40 56 nil nil nil)
 (ses-cell B40 4 nil nil nil)
-(ses-cell C40 nil nil nil nil)
+(ses-cell C40 657 nil nil nil)
 (ses-cell D40 nil nil nil nil)
 (ses-cell E40 nil nil nil nil)
 
@@ -337,11 +352,101 @@
 (ses-cell D48 nil nil nil nil)
 (ses-cell E48 nil nil nil nil)
 
-(ses-cell A49 "NaN" nil nil nil)
+(ses-cell A49 3 nil nil nil)
 (ses-cell B49 4 nil nil nil)
 (ses-cell C49 nil nil nil nil)
 (ses-cell D49 nil nil nil nil)
 (ses-cell E49 nil nil nil nil)
+
+(ses-cell A50 2 nil nil nil)
+(ses-cell B50 165 nil nil nil)
+(ses-cell C50 nil nil nil nil)
+(ses-cell D50 nil nil nil nil)
+(ses-cell E50 nil nil nil nil)
+
+(ses-cell A51 26 nil nil nil)
+(ses-cell B51 56 nil nil nil)
+(ses-cell C51 nil nil nil nil)
+(ses-cell D51 nil nil nil nil)
+(ses-cell E51 nil nil nil nil)
+
+(ses-cell A52 2 nil nil nil)
+(ses-cell B52 171 nil nil nil)
+(ses-cell C52 nil nil nil nil)
+(ses-cell D52 nil nil nil nil)
+(ses-cell E52 nil nil nil nil)
+
+(ses-cell A53 70 nil nil nil)
+(ses-cell B53 3 nil nil nil)
+(ses-cell C53 nil nil nil nil)
+(ses-cell D53 nil nil nil nil)
+(ses-cell E53 nil nil nil nil)
+
+(ses-cell A54 26 nil nil nil)
+(ses-cell B54 2 nil nil nil)
+(ses-cell C54 nil nil nil nil)
+(ses-cell D54 nil nil nil nil)
+(ses-cell E54 nil nil nil nil)
+
+(ses-cell A55 2 nil nil nil)
+(ses-cell B55 50 nil nil nil)
+(ses-cell C55 nil nil nil nil)
+(ses-cell D55 nil nil nil nil)
+(ses-cell E55 nil nil nil nil)
+
+(ses-cell A56 "NaN" nil nil nil)
+(ses-cell B56 122 nil nil nil)
+(ses-cell C56 nil nil nil nil)
+(ses-cell D56 nil nil nil nil)
+(ses-cell E56 nil nil nil nil)
+
+(ses-cell A57 "NaN" nil nil nil)
+(ses-cell B57 27 nil nil nil)
+(ses-cell C57 nil nil nil nil)
+(ses-cell D57 nil nil nil nil)
+(ses-cell E57 nil nil nil nil)
+
+(ses-cell A58 "NaN" nil nil nil)
+(ses-cell B58 167 nil nil nil)
+(ses-cell C58 nil nil nil nil)
+(ses-cell D58 nil nil nil nil)
+(ses-cell E58 nil nil nil nil)
+
+(ses-cell A59 "NaN" nil nil nil)
+(ses-cell B59 2 nil nil nil)
+(ses-cell C59 nil nil nil nil)
+(ses-cell D59 nil nil nil nil)
+(ses-cell E59 nil nil nil nil)
+
+(ses-cell A60 "NaN" nil nil nil)
+(ses-cell B60 23 nil nil nil)
+(ses-cell C60 nil nil nil nil)
+(ses-cell D60 nil nil nil nil)
+(ses-cell E60 nil nil nil nil)
+
+(ses-cell A61 "NaN" nil nil nil)
+(ses-cell B61 75 nil nil nil)
+(ses-cell C61 nil nil nil nil)
+(ses-cell D61 nil nil nil nil)
+(ses-cell E61 nil nil nil nil)
+
+(ses-cell A62 "NaN" nil nil nil)
+(ses-cell B62 52 nil nil nil)
+(ses-cell C62 nil nil nil nil)
+(ses-cell D62 nil nil nil nil)
+(ses-cell E62 nil nil nil nil)
+
+(ses-cell A63 "NaN" nil nil nil)
+(ses-cell B63 249 nil nil nil)
+(ses-cell C63 nil nil nil nil)
+(ses-cell D63 nil nil nil nil)
+(ses-cell E63 nil nil nil nil)
+
+(ses-cell A64 "NaN" nil nil nil)
+(ses-cell B64 27 nil nil nil)
+(ses-cell C64 nil nil nil nil)
+(ses-cell D64 nil nil nil nil)
+(ses-cell E64 nil nil nil nil)
 
 (ses-column-widths [7 7 7 7 7])
 (ses-column-printers [nil nil nil nil nil])
@@ -350,7 +455,7 @@
 
 ( ;Global parameters (these are read first)
  2 ;SES file-format
- 49 ;numrows
+ 64 ;numrows
  5 ;numcols
 )
 
