@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+    exec 1>&2
+    echo "ERROR: $0 requires GNU bash version 4.0 or later"
+    if [[ ${MACHTYPE} =~ apple ]]; then
+	echo 'On macOS consider "brew install bash"'
+    fi
+    exit 128
+fi
+
 unset tables; declare -A tables
 declare -a regions=(us-east-1 eu-central-1 ap-southeast-1)
 
