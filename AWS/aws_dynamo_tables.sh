@@ -12,8 +12,9 @@ fi
 unset tables; declare -A tables
 declare -a regions=(us-east-1 eu-central-1 ap-southeast-1)
 
+echo "Retrieving tables..."
 for region in ${regions[@]}; do
-    for table in $(aws dynamodb --region ${region} list-tables | cut -f2); do
+    for table in $(aws dynamodb --output text --region ${region} list-tables | cut -f2); do
 	tables[${table}]="${tables[${table}]} ${region}"
     done
 done
