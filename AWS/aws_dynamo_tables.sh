@@ -75,7 +75,9 @@ function print_item_counts() {
         printf "%-${tw}s" ${table}
         for region in ${regions[@]} ; do
             if [[ ${tables[${table}]} =~ ${region} ]]; then
-                printf "%'${rw}d" $(aws --output json --region ${region} dynamodb describe-table --table-name ${table} | jq ".Table.ItemCount")
+                items=$(aws --output json --region ${region} dynamodb describe-table --table-name ${table} | \
+                            jq ".Table.ItemCount")
+                printf "%'${rw}d" ${items} 
             else printf "%${rw}s" "-"
             fi
         done
