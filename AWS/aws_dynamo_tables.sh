@@ -53,7 +53,7 @@ function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..."
     for region in ${regions[@]}; do
         for table in $(aws dynamodb --output text --region ${region} list-tables | cut -f2); do
-            tables[${table}]="${tables[${table}]} ${region}"
+            tables[${table}]+=${region}
         done
     done
 }
