@@ -49,25 +49,25 @@ function check_aws() {
         exit 128
     fi
     if [[ ! -x "$(which jq)" ]]; then
-	exec 1>&2
-	echo "ERROR: $0 requires the jq tool to be installed"
-	if [[ ${MACHTYPE} =~ apple ]]; then
+        exec 1>&2
+        echo "ERROR: $0 requires the jq tool to be installed"
+        if [[ ${MACHTYPE} =~ apple ]]; then
             echo 'On macOS consider "brew install jq"'
-	fi
-	exit 128
+        fi
+        exit 128
     fi
 }
 
 function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..."
     for region in ${regions[@]}; do
-	local list
-	list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
-	if [[ $? = 255 ]]; then
-	    echo "ERROR: Incorrect region ${region}"
-	    exit 1
-	fi
-	list=${list//TABLENAMES/}
+        local list
+        list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
+        if [[ $? = 255 ]]; then
+            echo "ERROR: Incorrect region ${region}"
+            exit 1
+        fi
+        list=${list//TABLENAMES/}
         for table in ${list[@]}; do
             tables[${table}]+="${region} "
         done
@@ -76,9 +76,9 @@ function fetch_tables() {
 
 function print_header() {
     # calculate field widths; expect >10^9 items
-    let rw=$(for region in ${regions[@]}; do echo ${#region}; done | sort -n | tail -1)+1
-    let rw=$((${rw} >= 15 ? ${rw} : 15))
-    let tw=$(for table in ${!tables[@]}; do echo ${#table}; done | sort -n | tail -1)+1
+    rw=$(( $(for region in ${regions[@]}; do echo ${#region}; done | sort -n | tail -1) +1 ))
+    rw=$(( ${rw} >= 15 ? ${rw} : 15 ))
+    tw=$(( $(for table in ${!tables[@]}; do echo ${#table}; done | sort -n | tail -1) +1 ))
 
     printf "%-${tw}s" "DYNAMO TABLE"
     for region in ${regions[@]}; do
@@ -98,34 +98,34 @@ function collect_item_count_parallel() {
     local table=$1; shift
     local table_regions=$*
     echo $(parallel --keep-order aws --output json --region {} dynamodb describe-table \
-	     --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
+             --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
 }
 
 function print_item_counts() {
     for table in $(tr ' ' '\n' <<<  ${!tables[@]} | sort); do
         printf "%-${tw}s" ${table}
         declare -A items=( )
-	if [[ -z ${serial} && -x $(which parallel) ]]; then
-	    declare -a counts=( )
-	    counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
-	    for region in ${tables[${table}]}; do
-		items[${region}]=${counts}
-		counts=(${counts[@]:1})
-	    done
-	else
-            for region in ${regions[@]} ; do
-		if [[ ${tables[${table}]} =~ ${region} ]]; then
-                    items[${region}]=$(collect_item_count ${table} ${region})
-		fi
+        if [[ -z ${serial} && -x $(which parallel) ]]; then
+            declare -a counts=( )
+            counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
+            for region in ${tables[${table}]}; do
+                items[${region}]=${counts}
+                counts=(${counts[@]:1})
             done
-	fi
+        else
+            for region in ${regions[@]} ; do
+                if [[ ${tables[${table}]} =~ ${region} ]]; then
+                    items[${region}]=$(collect_item_count ${table} ${region})
+                fi
+            done
+        fi
         for region in ${regions[@]} ; do
-	    if [[ ! -v items[${region}] ]]; then
-		printf "%${rw}s" "-"
-	    else
-		printf "%'${rw}d" ${items[${region}]}
-	    fi
-	done
+            if [[ ! -v items[${region}] ]]; then
+                printf "%${rw}s" "-"
+            else
+                printf "%'${rw}d" ${items[${region}]}
+            fi
+        done
         echo
     done
 }
@@ -133,10 +133,10 @@ function print_item_counts() {
 unset regions
 while getopts ":Sapr:" options; do
     case ${options} in
-	S) serial=t ;;
+        S) serial=t ;;
         a) regions=( us-east-1 eu-central-1 ap-southeast-1 us-west-2 ) ;;
         p) regions=( us-east-1 eu-central-1 ap-southeast-1 ) ;;
-	r) regions=( ) ;;
+        r) regions=( ) ;;
         *) usage ;;
     esac
 done
