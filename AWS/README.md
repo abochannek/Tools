@@ -7,7 +7,7 @@ Bash script to query the item count in DynamoDB tables across multiple AWS regio
 
 Bash version 4.0 or later, the AWS CLI tool, and the [jq](https://stedolan.github.io/jq/) tool are required. [GNU Parallel](https://www.gnu.org/software/parallel/) is optional.
 
-Usage:
+### Usage
 
 `aws_dynamo_tables.sh [ -S ] [-C ] [ -a ] [ -p ] [ -r regions ]`
 
