@@ -70,15 +70,27 @@ function print_header() {
     echo
 }
 
+function collect_item_count() {
+    local region=$1
+    local table=$2
+    echo $(aws --output json --region ${region} dynamodb describe-table --table-name ${table} | \
+                           jq ".Table.ItemCount")
+}
+
 function print_item_counts() {
     for table in $(tr ' ' '\n' <<<  ${!tables[@]} | sort); do
         printf "%-${tw}s" ${table}
+        declare -A items=( )
         for region in ${regions[@]} ; do
             if [[ ${tables[${table}]} =~ ${region} ]]; then
-                items=$(aws --output json --region ${region} dynamodb describe-table --table-name ${table} | \
-                            jq ".Table.ItemCount")
-                printf "%'${rw}d" ${items} 
-            else printf "%${rw}s" "-"
+                items[${region}]=$(collect_item_count ${region} ${table})
+            fi
+        done
+        for region in ${regions[@]} ; do
+            if [[ ! -v items[${region}] ]]; then
+                printf "%${rw}s" "-"
+            else
+                printf "%'${rw}d" ${items[${region}]}
             fi
         done
         echo
