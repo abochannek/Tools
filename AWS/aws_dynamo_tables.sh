@@ -47,6 +47,14 @@ function check_aws() {
         fi
         exit 128
     fi
+    if [[ ! -x "$(which jq)" ]]; then
+	exec 1>&2
+	echo "ERROR: $0 requires the jq tool to be installed"
+	if [[ ${MACHTYPE} =~ apple ]]; then
+            echo 'On macOS consider "brew install jq"'
+	fi
+	exit 128
+    fi
 }
 
 function fetch_tables() {
