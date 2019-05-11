@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-#  aws_dynamo_tables.sh [ -S ] [ -a ] [ -p ] [ -r regions ]
+#  aws_dynamo_tables.sh [ -S ] [-C ] [ -a ] [ -p ] [ -r regions ]
 #
 #  -S query serially
+#  -C CSV output
 #  -a all regions
 #  -p production
 #  -r regions
@@ -20,7 +21,7 @@ if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
 fi
 
 function usage() {
-    echo "Usage: $0 [ -S ] [ -a ] [ -p ] [ -r regions ]" 1>&2
+    echo "Usage: $0 [ -S ] [ -C ] [ -a ] [ -p ] [ -r regions ]" 1>&2
     exit 1
 }
 
@@ -59,12 +60,12 @@ function check_aws() {
 }
 
 function fetch_tables() {
-    echo "Retrieving AWS DynamoDB tables..."
+    echo "Retrieving AWS DynamoDB tables..." 1>&2
     for region in ${regions[@]}; do
         local list
         list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
         if [[ $? = 255 ]]; then
-            echo "ERROR: Incorrect region ${region}"
+            echo "ERROR: Incorrect region ${region}" 1>&2
             exit 1
         fi
         list=${list//TABLENAMES/}
@@ -80,10 +81,15 @@ function print_header() {
     rw=$(( ${rw} >= 15 ? ${rw} : 15 ))
     tw=$(( $(for table in ${!tables[@]}; do echo ${#table}; done | sort -n | tail -1) +1 ))
 
-    printf "%-${tw}s" "DYNAMO TABLE"
-    for region in ${regions[@]}; do
-        printf "%${rw}s" ${region^^}
-    done
+    if [[ ! -v csv ]]; then
+        printf "%-${tw}s" "TABLE"
+        for region in ${regions[@]}; do
+            printf "%${rw}s" ${region^^}
+        done
+    else
+        echo -n "TABLE"
+        for region in ${regions[@]}; do echo -n ",${region^^}"; done
+    fi
     echo
 }
 
@@ -105,47 +111,65 @@ function fetch_print_items() {
     local -a counts=( )
     for table in $(tr ' ' '\n' <<<  ${!tables[@]} | sort); do
         local -A items=( )
-        printf "%-${tw}s" ${table}
-        if [[ -z ${serial} && -x $(which parallel) ]]; then
-            counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
-            for region in ${tables[${table}]}; do
-                items[${region}]=${counts}
-                counts=(${counts[@]:1})
-            done
+        if [[ ! -v csv ]]; then
+            printf "%-${tw}s" ${table}
         else
-            for region in ${regions[@]} ; do
-                if [[ ${tables[${table}]} =~ ${region} ]]; then
-                    items[${region}]=$(collect_item_count ${table} ${region})
-                fi
-            done
+            echo -n  ${table}
         fi
+        fetch_item_counts
         print_item_counts
     done
 }
 
+function fetch_item_counts() {
+    if [[ ! -v serial && -x $(which parallel) ]]; then
+        counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
+        for region in ${tables[${table}]}; do
+            items[${region}]=${counts}
+            counts=(${counts[@]:1})
+        done
+    else
+        for region in ${regions[@]} ; do
+            if [[ ${tables[${table}]} =~ ${region} ]]; then
+                items[${region}]=$(collect_item_count ${table} ${region})
+            fi
+        done
+    fi
+}
+
 function print_item_counts() {
-    for region in ${regions[@]} ; do
-        if [[ ! -v items[${region}] ]]; then
-            printf "%${rw}s" "-"
+    if [[ ! -v csv ]]; then
+        for region in ${regions[@]} ; do
+            if [[ ! -v items[${region}] ]]; then
+                printf "%${rw}s" "-"
             else
                 printf "%'${rw}d" ${items[${region}]}
-        fi
-    done
+            fi
+        done
+    else
+        for region in ${regions[@]} ; do
+            if [[ ! -v items[${region}] ]]; then
+                echo -n ,-
+            else
+                echo -n ",${items[${region}]}"
+            fi
+        done
+    fi
     echo
 }
 
-declare -a regions
-while getopts ":Sapr:" options; do
+declare -a regions=( )
+while getopts ":SCapr:" options; do
     case ${options} in
         S) serial=t ;;
+        C) csv=t ;;
         a) regions=( us-east-1 eu-central-1 ap-southeast-1 us-west-2 ) ;;
         p) regions=( us-east-1 eu-central-1 ap-southeast-1 ) ;;
-        r) regions=( ) ;;
+        r) regions=( ); rflag=t ;;
         *) usage ;;
     esac
 done
-
-if [[ ${OPTIND} > 1 && -z ${regions} ]]; then
+if [[ -v rflag ]]; then
     shift $(($OPTIND-2))
     regions=$@
 fi
