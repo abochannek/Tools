@@ -101,12 +101,12 @@ function collect_item_count_parallel() {
              --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
 }
 
-function print_item_counts() {
+function fetch_print_items() {
+    local -a counts=( )
     for table in $(tr ' ' '\n' <<<  ${!tables[@]} | sort); do
+        local -A items=( )
         printf "%-${tw}s" ${table}
-        declare -A items=( )
         if [[ -z ${serial} && -x $(which parallel) ]]; then
-            declare -a counts=( )
             counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
             for region in ${tables[${table}]}; do
                 items[${region}]=${counts}
@@ -119,18 +119,22 @@ function print_item_counts() {
                 fi
             done
         fi
-        for region in ${regions[@]} ; do
-            if [[ ! -v items[${region}] ]]; then
-                printf "%${rw}s" "-"
-            else
-                printf "%'${rw}d" ${items[${region}]}
-            fi
-        done
-        echo
+        print_item_counts
     done
 }
 
-unset regions
+function print_item_counts() {
+    for region in ${regions[@]} ; do
+        if [[ ! -v items[${region}] ]]; then
+            printf "%${rw}s" "-"
+            else
+                printf "%'${rw}d" ${items[${region}]}
+        fi
+    done
+    echo
+}
+
+declare -a regions
 while getopts ":Sapr:" options; do
     case ${options} in
         S) serial=t ;;
@@ -150,7 +154,9 @@ check_aws
 
 declare -A tables
 fetch_tables
+
+declare -i rw tw
 print_header
-print_item_counts
+fetch_print_items
 
 exit 0
