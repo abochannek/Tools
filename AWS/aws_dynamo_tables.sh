@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-#  aws_dynamo_tables.sh [ -a ] [ -p ] [ -r regions ]
+#  aws_dynamo_tables.sh [ -S ] [ -a ] [ -p ] [ -r regions ]
 #
+#  -S query serially
 #  -a all regions
 #  -p production
 #  -r regions
@@ -19,7 +20,7 @@ if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
 fi
 
 function usage() {
-    echo "Usage: $0 [ -a ] [ -p ] [ -r regions ]" 1>&2
+    echo "Usage: $0 [ -S ] [ -a ] [ -p ] [ -r regions ]" 1>&2
     exit 1
 }
 
@@ -60,15 +61,23 @@ function check_aws() {
 function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..."
     for region in ${regions[@]}; do
-        for table in $(aws dynamodb --output text --region ${region} list-tables | cut -f2); do
-            tables[${table}]+=${region}
+	local list
+	list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
+	if [[ $? = 255 ]]; then
+	    echo "ERROR: Incorrect region ${region}"
+	    exit 1
+	fi
+	list=${list//TABLENAMES/}
+        for table in ${list[@]}; do
+            tables[${table}]+="${region} "
         done
     done
 }
 
 function print_header() {
-    # calculate field width
+    # calculate field widths; expect >10^9 items
     let rw=$(for region in ${regions[@]}; do echo ${#region}; done | sort -n | tail -1)+1
+    let rw=$((${rw} >= 15 ? ${rw} : 15))
     let tw=$(for table in ${!tables[@]}; do echo ${#table}; done | sort -n | tail -1)+1
 
     printf "%-${tw}s" "DYNAMO TABLE"
@@ -79,52 +88,63 @@ function print_header() {
 }
 
 function collect_item_count() {
-    local region=$1
-    local table=$2
+    local table=$1
+    local region=$2
     echo $(aws --output json --region ${region} dynamodb describe-table --table-name ${table} | \
                            jq ".Table.ItemCount")
+}
+
+function collect_item_count_parallel() {
+    local table=$1; shift
+    local table_regions=$*
+    echo $(parallel --keep-order aws --output json --region {} dynamodb describe-table \
+	     --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
 }
 
 function print_item_counts() {
     for table in $(tr ' ' '\n' <<<  ${!tables[@]} | sort); do
         printf "%-${tw}s" ${table}
         declare -A items=( )
+	if [[ -z ${serial} && -x $(which parallel) ]]; then
+	    declare -a counts=( )
+	    counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
+	    for region in ${tables[${table}]}; do
+		items[${region}]=${counts}
+		counts=(${counts[@]:1})
+	    done
+	else
+            for region in ${regions[@]} ; do
+		if [[ ${tables[${table}]} =~ ${region} ]]; then
+                    items[${region}]=$(collect_item_count ${table} ${region})
+		fi
+            done
+	fi
         for region in ${regions[@]} ; do
-            if [[ ${tables[${table}]} =~ ${region} ]]; then
-                items[${region}]=$(collect_item_count ${region} ${table})
-            fi
-        done
-        for region in ${regions[@]} ; do
-            if [[ ! -v items[${region}] ]]; then
-                printf "%${rw}s" "-"
-            else
-                printf "%'${rw}d" ${items[${region}]}
-            fi
-        done
+	    if [[ ! -v items[${region}] ]]; then
+		printf "%${rw}s" "-"
+	    else
+		printf "%'${rw}d" ${items[${region}]}
+	    fi
+	done
         echo
     done
 }
 
 unset regions
-while getopts ":apr:" options; do
+while getopts ":Sapr:" options; do
     case ${options} in
-        a)
-            regions=( us-east-1 eu-central-1 ap-southeast-1 us-west-2 )
-            ;;
-        p)
-            regions=( us-east-1 eu-central-1 ap-southeast-1 )
-            ;;
-        r)
-            regions=( )
-            ;;
-        *)
-            usage
-            ;;
+	S) serial=t ;;
+        a) regions=( us-east-1 eu-central-1 ap-southeast-1 us-west-2 ) ;;
+        p) regions=( us-east-1 eu-central-1 ap-southeast-1 ) ;;
+	r) regions=( ) ;;
+        *) usage ;;
     esac
-    if [[ -z ${regions} ]]; then
-        shift; regions=$@
-    fi
-done      
+done
+
+if [[ ${OPTIND} > 1 && -z ${regions} ]]; then
+    shift $(($OPTIND-2))
+    regions=$@
+fi
 
 check_aws
 
