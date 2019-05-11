@@ -20,6 +20,9 @@ if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
     exit 128
 fi
 
+declare -a all_regions=( us-east-1 eu-central-1 ap-southeast-1 us-west-2 )
+declare -a prod_regions=( us-east-1 eu-central-1 ap-southeast-1 )
+
 function usage() {
     echo "Usage: $0 [ -S ] [ -C ] [ -a ] [ -p ] [ -r regions ]" 1>&2
     exit 1
@@ -163,9 +166,9 @@ while getopts ":SCapr:" options; do
     case ${options} in
         S) serial=t ;;
         C) csv=t ;;
-        a) regions=( us-east-1 eu-central-1 ap-southeast-1 us-west-2 ) ;;
-        p) regions=( us-east-1 eu-central-1 ap-southeast-1 ) ;;
-        r) regions=( ); rflag=t ;;
+        a) regions=${all_regions[@]} ;;
+        p) regions=${prod_regions[@]} ;;
+        r) rflag=t ;;
         *) usage ;;
     esac
 done
