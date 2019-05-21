@@ -80,10 +80,20 @@ function fetch_tables() {
 }
 
 function print_header() {
+
+    function header_width() {
+        local -n arrayref=$1
+        echo $(( $(for item in ${arrayref[@]}; do
+                       echo ${#item}; done | sort -n | tail -1)
+                 +1 ))
+    }
+
     # calculate field widths; expect >10^9 items
-    rw=$(( $(for region in ${regions[@]}; do echo ${#region}; done | sort -n | tail -1) +1 ))
-    rw=$(( ${rw} >= 15 ? ${rw} : 15 ))
-    tw=$(( $(for table in ${!tables[@]}; do echo ${#table}; done | sort -n | tail -1) +1 ))
+    rw=$(header_width regions)
+    rw=$(( ${rw} < 15 ? 15 : ${rw} ))
+
+    local table_keys=${!tables[@]}
+    tw=$(header_width table_keys)
 
     if [[ ! -v csv ]]; then
         printf "%-${tw}s" "TABLE"
