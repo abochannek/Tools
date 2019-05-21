@@ -11,12 +11,15 @@
 #  default region is configured in .aws/config or AWS_DEFAULT_REGION
 #
 
+
+MACOS_ERROR_MACRO='if [[ ${MACHTYPE} =~ apple ]]; then
+                       echo On macOS consider \"brew install TOOL\";
+                   fi'
+
 if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
     exec 1>&2
     echo "ERROR: $0 requires GNU bash version 4.0 or later"
-    if [[ ${MACHTYPE} =~ apple ]]; then
-        echo 'On macOS consider "brew install bash"'
-    fi
+    eval $(m4 -D TOOL=bash <<< ${MACOS_ERROR_MACRO})
     exit 128
 fi
 
@@ -55,9 +58,7 @@ function check_aws() {
     if [[ ! -x "$(which jq)" ]]; then
         exec 1>&2
         echo "ERROR: $0 requires the jq tool to be installed"
-        if [[ ${MACHTYPE} =~ apple ]]; then
-            echo 'On macOS consider "brew install jq"'
-        fi
+        eval $(m4 -D TOOL=jq <<< ${MACOS_ERROR_MACRO})
         exit 128
     fi
 }
