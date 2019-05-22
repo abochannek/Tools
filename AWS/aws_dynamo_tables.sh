@@ -16,9 +16,10 @@ MACOS_ERROR_MACRO='if [[ ${MACHTYPE} =~ apple ]]; then
                        echo On macOS consider \"brew install TOOL\";
                    fi'
 
-if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+if [[ ${BASH_VERSINFO[0]} -lt 4 ||
+      ${BASH_VERSINFO[0]} -eq 4 && ${BASH_VERSINFO[1]} -lt 3 ]]; then
     exec 1>&2
-    echo "ERROR: $0 requires GNU bash version 4.0 or later"
+    echo "ERROR: $0 requires GNU bash version 4.3 or later"
     eval $(m4 -D TOOL=bash <<< ${MACOS_ERROR_MACRO})
     exit 128
 fi
