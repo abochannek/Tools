@@ -163,7 +163,7 @@ function print_header() {
 function fetch_print_items_parallel() {
     local -A tables_and_items_by_region=( )
     for region in ${!tables_by_region[@]}; do
-        tables_and_items_by_region[${region}]=$(parallel --keep-order \
+        tables_and_items_by_region[${region}]=$(parallel --jobs 0 --keep-order \
               'aws --output json --region '${region}' dynamodb describe-table \
                    --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
                    ::: ${tables_by_region[${region}]})
