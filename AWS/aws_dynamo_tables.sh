@@ -81,8 +81,12 @@ function fetch_tables() {
         local list
         list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
         list=${list//TABLENAMES/}
+        # Build up two tables
+        # regions_by_table is structured for output
+        # tables_by_region is optimized for parallel item fetching
+        tables_by_region[${region}]=${list}
         for table in ${list[@]}; do
-            tables[${table}]+="${region} "
+            regions_by_table[${table}]+="${region} "
         done
     done
 }
@@ -100,7 +104,7 @@ function print_header() {
     rw=$(header_width regions)
     rw=$(( ${rw} < 15 ? 15 : ${rw} ))
 
-    local table_keys=${!tables[@]}
+    local table_keys=${!regions_by_table[@]}
     tw=$(header_width table_keys)
 
     if [[ ! -v csv ]]; then
@@ -131,7 +135,7 @@ function collect_item_count_parallel() {
 
 function fetch_print_items() {
     local -a counts=( )
-    for table in $(tr ' ' '\n' <<<  ${!tables[@]} | sort); do
+    for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
         local -A items=( )
         if [[ ! -v csv ]]; then
             printf "%-${tw}s" ${table}
@@ -145,14 +149,14 @@ function fetch_print_items() {
 
 function fetch_item_counts() {
     if [[ ! -v serial && -x $(which parallel) ]]; then
-        counts=($(collect_item_count_parallel ${table} ${tables[${table}]}))
-        for region in ${tables[${table}]}; do
+        counts=($(collect_item_count_parallel ${table} ${regions_by_table[${table}]}))
+        for region in ${regions_by_table[${table}]}; do
             items[${region}]=${counts}
             counts=(${counts[@]:1})
         done
     else
         for region in ${regions[@]} ; do
-            if [[ ${tables[${table}]} =~ ${region} ]]; then
+            if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
                 items[${region}]=$(collect_item_count ${table} ${region})
             fi
         done
@@ -199,7 +203,8 @@ fi
 check_aws
 check_regions
 
-declare -A tables
+declare -A regions_by_table
+declare -A tables_by_region
 fetch_tables
 
 declare -i rw tw
