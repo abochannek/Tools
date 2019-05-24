@@ -119,18 +119,28 @@ function print_header() {
     echo
 }
 
-function collect_item_count() {
-    local table=$1
-    local region=$2
-    echo $(aws --output json --region ${region} dynamodb describe-table --table-name ${table} | \
-                           jq ".Table.ItemCount")
-}
-
-function collect_item_count_parallel() {
-    local table=$1; shift
-    local table_regions=$*
-    echo $(parallel --keep-order aws --output json --region {} dynamodb describe-table \
-             --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
+function fetch_print_items_parallel() {
+    function collect_item_count_parallel() {
+        local table=$1; shift
+        local table_regions=$*
+        echo $(parallel --keep-order aws --output json --region {} dynamodb describe-table \
+                        --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
+    }
+    local -a counts=( )
+    for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
+        local -A items=( )
+        if [[ ! -v csv ]]; then
+            printf "%-${tw}s" ${table}
+        else
+            echo -n  ${table}
+        fi
+        counts=($(collect_item_count_parallel ${table} ${regions_by_table[${table}]}))
+        for region in ${regions_by_table[${table}]}; do
+            items[${region}]=${counts}
+            counts=(${counts[@]:1})
+        done
+        print_item_counts
+    done
 }
 
 function fetch_print_items() {
@@ -140,27 +150,18 @@ function fetch_print_items() {
         if [[ ! -v csv ]]; then
             printf "%-${tw}s" ${table}
         else
-            echo -n  ${table}
+            echo -n ${table}
         fi
-        fetch_item_counts
-        print_item_counts
-    done
-}
-
-function fetch_item_counts() {
-    if [[ ! -v serial && -x $(which parallel) ]]; then
-        counts=($(collect_item_count_parallel ${table} ${regions_by_table[${table}]}))
-        for region in ${regions_by_table[${table}]}; do
-            items[${region}]=${counts}
-            counts=(${counts[@]:1})
-        done
-    else
         for region in ${regions[@]} ; do
             if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
-                items[${region}]=$(collect_item_count ${table} ${region})
+                item=$(aws --output json --region ${region} \
+                           dynamodb describe-table --table-name ${table} | \
+                           jq ".Table.ItemCount")
+                items[${region}]=${item}
             fi
         done
-    fi
+        print_item_counts
+    done
 }
 
 function print_item_counts() {
@@ -209,6 +210,11 @@ fetch_tables
 
 declare -i rw tw
 print_header
-fetch_print_items
+
+if [[ ! -v serial && -x $(which parallel) ]]; then
+    fetch_print_items_parallel
+else
+    fetch_print_items
+fi
 
 exit 0
