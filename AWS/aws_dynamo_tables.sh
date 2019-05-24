@@ -64,15 +64,22 @@ function check_aws() {
     fi
 }
 
+function check_regions() {
+    mapfile < <(aws --output json ec2 describe-regions |
+                    jq --raw-output ".Regions[].RegionName")
+    for region in ${regions[@]}; do
+        if [[ ! ${MAPFILE[@]}  =~ ${region} ]]; then
+            echo "ERROR: Incorrect region ${region}" 1>&2
+            exit 1
+        fi
+    done
+}
+
 function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..." 1>&2
     for region in ${regions[@]}; do
         local list
         list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
-        if [[ $? = 255 ]]; then
-            echo "ERROR: Incorrect region ${region}" 1>&2
-            exit 1
-        fi
         list=${list//TABLENAMES/}
         for table in ${list[@]}; do
             tables[${table}]+="${region} "
@@ -190,6 +197,7 @@ if [[ -v rflag ]]; then
 fi
 
 check_aws
+check_regions
 
 declare -A tables
 fetch_tables
