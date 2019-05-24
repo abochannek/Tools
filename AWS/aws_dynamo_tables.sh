@@ -15,6 +15,11 @@
 MACOS_ERROR_MACRO='if [[ ${MACHTYPE} =~ apple ]]; then
                        echo On macOS consider \"brew install TOOL\";
                    fi'
+TABLE_NAME_PRINT_MACRO='if [[ ! -v csv ]]; then
+                            printf "%-${tw}s" ${table};
+                        else
+                            echo -n  ${table};
+                        fi'
 
 if [[ ${BASH_VERSINFO[0]} -lt 4 ||
       ${BASH_VERSINFO[0]} -eq 4 && ${BASH_VERSINFO[1]} -lt 3 ]]; then
@@ -56,12 +61,14 @@ function main() {
     declare -A tables_by_region
     fetch_tables
 
-    declare -i rw tw
-    print_header
 
+    declare -i rw tw
     if [[ ! -v serial && -x $(which parallel) ]]; then
+        echo "Please wait..." 1>&2
+        print_header
         fetch_print_items_parallel
     else
+        print_header
         fetch_print_items
     fi
 }
@@ -115,7 +122,7 @@ function fetch_tables() {
         local list
         list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
         list=${list//TABLENAMES/}
-        # Build up two tables
+        # Build up two associative arrays
         # regions_by_table is structured for output
         # tables_by_region is optimized for parallel item fetching
         tables_by_region[${region}]=${list}
@@ -154,39 +161,33 @@ function print_header() {
 }
 
 function fetch_print_items_parallel() {
-    function collect_item_count_parallel() {
-        local table=$1; shift
-        local table_regions=$*
-        echo $(parallel --keep-order aws --output json --region {} dynamodb describe-table \
-                        --table-name ${table} '|' jq ".Table.ItemCount" ::: ${table_regions})
-    }
-    local -a counts=( )
+    local -A tables_and_items_by_region=( )
+    for region in ${!tables_by_region[@]}; do
+        tables_and_items_by_region[${region}]=$(parallel --keep-order \
+              'aws --output json --region '${region}' dynamodb describe-table \
+                   --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
+                   ::: ${tables_by_region[${region}]})
+    done
     for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
         local -A items=( )
-        if [[ ! -v csv ]]; then
-            printf "%-${tw}s" ${table}
-        else
-            echo -n  ${table}
-        fi
-        counts=($(collect_item_count_parallel ${table} ${regions_by_table[${table}]}))
-        for region in ${regions_by_table[${table}]}; do
-            items[${region}]=${counts}
-            counts=(${counts[@]:1})
+        eval $(m4 <<< ${TABLE_NAME_PRINT_MACRO})
+        for region in ${regions[@]} ; do
+            local item
+            if [[ ${tables_and_items_by_region[${region}]} =~ ${table} ]]; then
+                item=$(sed -n "/${table}/{n;p;}" <<< ${tables_and_items_by_region[${region}]})
+                items[${region}]=${item}
+            fi
         done
         print_item_counts
     done
 }
 
 function fetch_print_items() {
-    local -a counts=( )
     for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
         local -A items=( )
-        if [[ ! -v csv ]]; then
-            printf "%-${tw}s" ${table}
-        else
-            echo -n ${table}
-        fi
+        eval $(m4 <<< ${TABLE_NAME_PRINT_MACRO})
         for region in ${regions[@]} ; do
+            local item
             if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
                 item=$(aws --output json --region ${region} \
                            dynamodb describe-table --table-name ${table} | \
