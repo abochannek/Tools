@@ -32,6 +32,40 @@ function usage() {
     exit 1
 }
 
+declare -a regions=( )
+while getopts ":SCapr:" options; do
+    case ${options} in
+        S) serial=t ;;
+        C) csv=t ;;
+        a) regions=${all_regions[@]} ;;
+        p) regions=${prod_regions[@]} ;;
+        r) rflag=t ;;
+        *) usage ;;
+    esac
+done
+if [[ -v rflag ]]; then
+    shift $(($OPTIND-2))
+    regions=$@
+fi
+
+function main() {
+    check_aws
+    check_regions
+    
+    declare -A regions_by_table
+    declare -A tables_by_region
+    fetch_tables
+
+    declare -i rw tw
+    print_header
+
+    if [[ ! -v serial && -x $(which parallel) ]]; then
+        fetch_print_items_parallel
+    else
+        fetch_print_items
+    fi
+}
+
 function check_aws() {
     if [[ -x "$(which aws)" ]]; then
         while IFS= read -r; do
@@ -185,36 +219,6 @@ function print_item_counts() {
     echo
 }
 
-declare -a regions=( )
-while getopts ":SCapr:" options; do
-    case ${options} in
-        S) serial=t ;;
-        C) csv=t ;;
-        a) regions=${all_regions[@]} ;;
-        p) regions=${prod_regions[@]} ;;
-        r) rflag=t ;;
-        *) usage ;;
-    esac
-done
-if [[ -v rflag ]]; then
-    shift $(($OPTIND-2))
-    regions=$@
-fi
-
-check_aws
-check_regions
-
-declare -A regions_by_table
-declare -A tables_by_region
-fetch_tables
-
-declare -i rw tw
-print_header
-
-if [[ ! -v serial && -x $(which parallel) ]]; then
-    fetch_print_items_parallel
-else
-    fetch_print_items
-fi
+main
 
 exit 0
