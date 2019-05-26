@@ -12,14 +12,10 @@
 #
 
 
-MACOS_ERROR_MACRO='if [[ ${MACHTYPE} =~ apple ]]; then
-                       echo On macOS consider \"brew install TOOL\";
-                   fi'
-TABLE_NAME_PRINT_MACRO='if [[ ! -v csv ]]; then
-                            printf "%-${tw}s" ${table};
-                        else
-                            echo -n  ${table};
-                        fi'
+MACOS_ERROR_MACRO='ifelse(index('${MACHTYPE#*-}',apple),0,
+                   echo On macOS consider \"brew install TOOL\")'
+TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,echo -n ${table},
+                        printf "%-${tw}s" ${table})'
 
 if [[ ${BASH_VERSINFO[0]} -lt 4 ||
       ${BASH_VERSINFO[0]} -eq 4 && ${BASH_VERSINFO[1]} -lt 3 ]]; then
@@ -170,7 +166,7 @@ function fetch_print_items_parallel() {
     done
     for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
         local -A items=( )
-        eval $(m4 <<< ${TABLE_NAME_PRINT_MACRO})
+        eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
         for region in ${regions[@]} ; do
             local item
             if [[ ${tables_and_items_by_region[${region}]} =~ ${table} ]]; then
@@ -185,7 +181,7 @@ function fetch_print_items_parallel() {
 function fetch_print_items() {
     for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
         local -A items=( )
-        eval $(m4 <<< ${TABLE_NAME_PRINT_MACRO})
+        eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
         for region in ${regions[@]} ; do
             local item
             if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
