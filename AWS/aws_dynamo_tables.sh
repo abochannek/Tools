@@ -34,6 +34,7 @@ function usage() {
 }
 
 declare -a regions=( )
+declare serial=nil csv=nil
 while getopts ":SCapr:" options; do
     case ${options} in
         S) serial=t ;;
@@ -59,14 +60,10 @@ function main() {
 
 
     declare -i rw tw
-    if [[ ! -v serial && -x $(which parallel) ]]; then
-        echo "Please wait..." 1>&2
-        print_header
-        fetch_print_items_parallel
-    else
-        print_header
-        fetch_print_items
+    if [[ ${serial} == nil && ! -x $(which parallel) ]]; then
+        serial=t
     fi
+    fetch_print_items
 }
 
 function check_aws() {
@@ -128,7 +125,45 @@ function fetch_tables() {
     done
 }
 
-function print_header() {
+function fetch_print_items() {
+    # If parallel, prefetch all tables and fill in output array later
+    # If serial, fill in the output array one item at a time
+    if [[ ${serial} == nil ]]; then
+        local -A tables_and_items_by_region=( )
+        echo "Please wait..." 1>&2
+        for region in ${!tables_by_region[@]}; do
+            tables_and_items_by_region[${region}]=$(parallel --jobs 0 --keep-order \
+                'aws --output json --region '${region}' dynamodb describe-table \
+                     --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
+                     ::: ${tables_by_region[${region}]})
+        done
+    fi
+    print_table_header
+    for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
+        local -A items=( )
+        eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
+        for region in ${regions[@]} ; do
+            local item
+            case ${serial} in
+                t)
+                    if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
+                        item=$(aws --output json --region ${region} \
+                                   dynamodb describe-table --table-name ${table} | \
+                                   jq ".Table.ItemCount")
+                        items[${region}]=${item}
+                    fi;;
+                nil)
+                    if [[ ${tables_and_items_by_region[${region}]} =~ ${table} ]]; then
+                        item=$(sed -n "/${table}/{n;p;}" <<< ${tables_and_items_by_region[${region}]})
+                        items[${region}]=${item}
+                    fi;;
+            esac
+        done
+        print_item_counts
+    done
+}
+
+function print_table_header() {
 
     function header_width() {
         local -n arrayref=$1
@@ -144,7 +179,7 @@ function print_header() {
     local table_keys=${!regions_by_table[@]}
     tw=$(header_width table_keys)
 
-    if [[ ! -v csv ]]; then
+    if [[ ${csv} == nil ]]; then
         printf "%-${tw}s" "TABLE"
         for region in ${regions[@]}; do
             printf "%${rw}s" ${region^^}
@@ -156,47 +191,8 @@ function print_header() {
     echo
 }
 
-function fetch_print_items_parallel() {
-    local -A tables_and_items_by_region=( )
-    for region in ${!tables_by_region[@]}; do
-        tables_and_items_by_region[${region}]=$(parallel --jobs 0 --keep-order \
-              'aws --output json --region '${region}' dynamodb describe-table \
-                   --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
-                   ::: ${tables_by_region[${region}]})
-    done
-    for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
-        local -A items=( )
-        eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
-        for region in ${regions[@]} ; do
-            local item
-            if [[ ${tables_and_items_by_region[${region}]} =~ ${table} ]]; then
-                item=$(sed -n "/${table}/{n;p;}" <<< ${tables_and_items_by_region[${region}]})
-                items[${region}]=${item}
-            fi
-        done
-        print_item_counts
-    done
-}
-
-function fetch_print_items() {
-    for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
-        local -A items=( )
-        eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
-        for region in ${regions[@]} ; do
-            local item
-            if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
-                item=$(aws --output json --region ${region} \
-                           dynamodb describe-table --table-name ${table} | \
-                           jq ".Table.ItemCount")
-                items[${region}]=${item}
-            fi
-        done
-        print_item_counts
-    done
-}
-
 function print_item_counts() {
-    if [[ ! -v csv ]]; then
+    if [[ ${csv} == nil ]]; then
         for region in ${regions[@]} ; do
             if [[ ! -v items[${region}] ]]; then
                 printf "%${rw}s" "-"
