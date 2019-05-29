@@ -132,7 +132,7 @@ function fetch_print_items() {
         local -A tables_and_items_by_region=( )
         echo "Please wait..." 1>&2
         for region in ${!tables_by_region[@]}; do
-            tables_and_items_by_region[${region}]=$(parallel --jobs 0 --keep-order \
+            tables_and_items_by_region[${region}]=$(parallel --will-cite --jobs 0 --keep-order \
                 'aws --output json --region '${region}' dynamodb describe-table \
                      --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
                      ::: ${tables_by_region[${region}]})
