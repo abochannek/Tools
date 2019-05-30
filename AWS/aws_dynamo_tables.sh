@@ -17,10 +17,9 @@ MACOS_ERROR_MACRO='ifelse(index('${MACHTYPE#*-}',apple),0,
 TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,echo -n ${table},
                         printf "%-${tw}s" ${table})'
 
-if [[ ${BASH_VERSINFO[0]} -lt 4 ||
-      ${BASH_VERSINFO[0]} -eq 4 && ${BASH_VERSINFO[1]} -lt 3 ]]; then
+if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
     exec 1>&2
-    echo "ERROR: $0 requires GNU bash version 4.3 or later"
+    echo "ERROR: $0 requires GNU bash version 4.0 or later"
     eval $(m4 -D TOOL=bash <<< ${MACOS_ERROR_MACRO})
     exit 128
 fi
@@ -164,20 +163,26 @@ function fetch_print_items() {
 }
 
 function print_table_header() {
-
-    function header_width() {
-        local -n arrayref=$1
-        echo $(( $(for item in ${arrayref[@]}; do
-                       echo ${#item}; done | sort -n | tail -1)
-                 +1 ))
-    }
-
-    # calculate field widths; expect >10^9 items
-    rw=$(header_width regions)
-    rw=$(( ${rw} < 15 ? 15 : ${rw} ))
-
     local table_keys=${!regions_by_table[@]}
-    tw=$(header_width table_keys)
+    eval $(echo "r ${regions[@]};t ${table_keys[@]}" |
+        awk 'BEGIN {rw=0; tw=0}
+             function size()
+             {
+             for (i=2; i<=NF; i++) {
+                 cur=length($i)
+                 max=(cur>max?cur:max)
+                 }
+             return(max)
+             }
+             /^r / {
+                   rw=size()
+                   # expect >10^9 items
+                   rw=(rw<14?14:rw)
+                   }            
+             /^t / {tw=size()}
+             END {
+                  printf "rw=%d tw=%d\n", ++rw, ++tw
+                 }' RS=\;)
 
     if [[ ${csv} == nil ]]; then
         printf "%-${tw}s" "TABLE"
