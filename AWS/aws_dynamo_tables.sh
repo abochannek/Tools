@@ -101,7 +101,7 @@ function check_regions() {
     mapfile < <(aws --output json ec2 describe-regions |
                     jq --raw-output ".Regions[].RegionName")
     for region in "${regions[@]}"; do
-        if [[ ! ${MAPFILE[@]}  =~ ${region} ]]; then
+        if [[ ! ${MAPFILE[*]}  =~ ${region} ]]; then
             echo "ERROR: Incorrect region ${region}" 1>&2
             exit 1
         fi
@@ -164,7 +164,7 @@ function fetch_print_items() {
 
 function print_table_header() {
     local table_keys=${!regions_by_table[@]}
-    eval $(echo "r ${regions[@]};t ${table_keys[@]}" |
+    eval $(echo "r " "${regions[@]}" ";t " "${table_keys[@]}" |
         awk 'BEGIN {rw=0; tw=0}
              function size()
              {
