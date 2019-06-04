@@ -14,6 +14,7 @@
 
 MACOS_ERROR_MACRO='ifelse(index('${MACHTYPE#*-}',apple),0,
                    echo On macOS consider \"brew install TOOL\")'
+# shellcheck disable=SC2016
 TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,echo -n ${table},
                         printf "%-${tw}s" ${table})'
 
