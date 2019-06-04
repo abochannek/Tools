@@ -20,7 +20,7 @@ TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,echo -n ${table},
 if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
     exec 1>&2
     echo "ERROR: $0 requires GNU bash version 4.0 or later"
-    eval $(m4 -D TOOL=bash <<< ${MACOS_ERROR_MACRO})
+    eval "$(m4 -D TOOL=bash <<< ${MACOS_ERROR_MACRO})"
     exit 128
 fi
 
@@ -92,7 +92,7 @@ function check_aws() {
     if [[ ! -x "$(which jq)" ]]; then
         exec 1>&2
         echo "ERROR: $0 requires the jq tool to be installed"
-        eval $(m4 -D TOOL=jq <<< ${MACOS_ERROR_MACRO})
+        eval "$(m4 -D TOOL=jq <<< ${MACOS_ERROR_MACRO})"
         exit 128
     fi
 }
@@ -140,7 +140,7 @@ function fetch_print_items() {
     print_table_header
     for table in $(tr ' ' '\n' <<<  "${!regions_by_table[@]}" | sort); do
         local -A items=( )
-        eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
+        eval "$(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})"
         for region in "${regions[@]}" ; do
             local item
             case ${serial} in
@@ -163,8 +163,8 @@ function fetch_print_items() {
 }
 
 function print_table_header() {
-    local table_keys=${!regions_by_table[@]}
-    eval $(echo "r " "${regions[@]}" ";t " "${table_keys[@]}" |
+    local table_keys=${!regions_by_table[*]}
+    eval "$(echo "r " "${regions[@]}" ";t " "${table_keys[@]}" |
         awk 'BEGIN {rw=0; tw=0}
              function size()
              {
@@ -182,7 +182,7 @@ function print_table_header() {
              /^t / {tw=size()}
              END {
                   printf "rw=%d tw=%d\n", ++rw, ++tw
-                 }' RS=\;)
+                 }' RS=\;)"
 
     if [[ ${csv} == nil ]]; then
         printf "%-${tw}s" "TABLE"
