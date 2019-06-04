@@ -112,8 +112,8 @@ function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..." 1>&2
     for region in "${regions[@]}"; do
         local list
-        list=$(aws dynamodb --output text --region "${region}" list-tables 2>/dev/null)
-        list=${list//TABLENAMES/}
+        list=$(aws dynamodb --output json --region "${region}" list-tables | \
+		   jq --raw-output ".TableNames[]")
         # Build up two associative arrays
         # regions_by_table is structured for output
         # tables_by_region is optimized for parallel item fetching
@@ -132,28 +132,28 @@ function fetch_print_items() {
         echo "Please wait..." 1>&2
         for region in "${!tables_by_region[@]}"; do
             tables_and_items_by_region[${region}]=$(parallel --will-cite --jobs 0 --keep-order \
-                'aws --output json --region '${region}' dynamodb describe-table \
-                     --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
-                     ::: ${tables_by_region[${region}]})
+                'aws --output json --region '"${region}"' dynamodb describe-table' \
+                     '--table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
+                     ::: "${tables_by_region[${region}]}")
         done
     fi
     print_table_header
     for table in $(tr ' ' '\n' <<<  "${!regions_by_table[@]}" | sort); do
         local -A items=( )
-        eval "$(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})"
+        eval "$(m4 -D CSV=${csv} <<< "${TABLE_NAME_PRINT_MACRO}")"
         for region in "${regions[@]}" ; do
             local item
             case ${serial} in
                 t)
                     if [[ ${regions_by_table[${table}]} =~ ${region} ]]; then
-                        item=$(aws --output json --region ${region} \
-                                   dynamodb describe-table --table-name ${table} | \
+                        item=$(aws --output json --region "${region}" \
+                                   dynamodb describe-table --table-name "${table}" | \
                                    jq ".Table.ItemCount")
                         items[${region}]=${item}
                     fi;;
                 nil)
                     if [[ ${tables_and_items_by_region[${region}]} =~ ${table} ]]; then
-                        item=$(sed -n "/${table}/{n;p;}" <<< ${tables_and_items_by_region[${region}]})
+                        item=$(sed -n "/${table}/{n;p;}" <<< "${tables_and_items_by_region[${region}]}")
                         items[${region}]=${item}
                     fi;;
             esac
