@@ -20,7 +20,7 @@ TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,echo -n ${table},
 if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
     exec 1>&2
     echo "ERROR: $0 requires GNU bash version 4.0 or later"
-    eval "$(m4 -D TOOL=bash <<< ${MACOS_ERROR_MACRO})"
+    eval "$(m4 -D TOOL=bash <<< "${MACOS_ERROR_MACRO}")"
     exit 128
 fi
 
@@ -74,7 +74,7 @@ function check_aws() {
             fi
             if [[ ! -v regions && ${REPLY} =~ region ]]; then
                 if [[ ! ${REPLY} =~ None$ ]]; then
-                    set -- ${REPLY}
+                    set -- "${REPLY}"
                     regions=$2
                 else
                     usage
@@ -92,7 +92,7 @@ function check_aws() {
     if [[ ! -x $(command -v jq) ]]; then
         exec 1>&2
         echo "ERROR: $0 requires the jq tool to be installed"
-        eval "$(m4 -D TOOL=jq <<< ${MACOS_ERROR_MACRO})"
+        eval "$(m4 -D TOOL=jq <<< "${MACOS_ERROR_MACRO}")"
         exit 128
     fi
 }
@@ -112,7 +112,7 @@ function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..." 1>&2
     for region in "${regions[@]}"; do
         local list
-        list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
+        list=$(aws dynamodb --output text --region "${region}" list-tables 2>/dev/null)
         list=${list//TABLENAMES/}
         # Build up two associative arrays
         # regions_by_table is structured for output
@@ -187,7 +187,7 @@ function print_table_header() {
     if [[ ${csv} == nil ]]; then
         printf "%-${tw}s" "TABLE"
         for region in "${regions[@]}"; do
-            printf "%${rw}s" ${region^^}
+            printf "%${rw}s" "${region^^}"
         done
     else
         echo -n "TABLE"
@@ -202,7 +202,7 @@ function print_item_counts() {
             if [[ ! -v items[${region}] ]]; then
                 printf "%${rw}s" "-"
             else
-                printf "%'${rw}d" ${items[${region}]}
+                printf "%'${rw}d" "${items[${region}]}"
             fi
         done
     else
