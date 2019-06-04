@@ -38,15 +38,15 @@ while getopts ":SCapr:" options; do
     case ${options} in
         S) serial=t ;;
         C) csv=t ;;
-        a) regions=${all_regions[@]} ;;
-        p) regions=${prod_regions[@]} ;;
+        a) regions=( "${all_regions[@]}" ) ;;
+        p) regions=( "${prod_regions[@]}" ) ;;
         r) rflag=t ;;
         *) usage ;;
     esac
 done
 if [[ -v rflag ]]; then
-    shift $(($OPTIND-2))
-    regions=$@
+    shift $(( OPTIND-2 ))
+    regions=( "$@" )
 fi
 
 function main() {
@@ -100,7 +100,7 @@ function check_aws() {
 function check_regions() {
     mapfile < <(aws --output json ec2 describe-regions |
                     jq --raw-output ".Regions[].RegionName")
-    for region in ${regions[@]}; do
+    for region in "${regions[@]}"; do
         if [[ ! ${MAPFILE[@]}  =~ ${region} ]]; then
             echo "ERROR: Incorrect region ${region}" 1>&2
             exit 1
@@ -110,7 +110,7 @@ function check_regions() {
 
 function fetch_tables() {
     echo "Retrieving AWS DynamoDB tables..." 1>&2
-    for region in ${regions[@]}; do
+    for region in "${regions[@]}"; do
         local list
         list=$(aws dynamodb --output text --region ${region} list-tables 2>/dev/null)
         list=${list//TABLENAMES/}
@@ -141,7 +141,7 @@ function fetch_print_items() {
     for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
         local -A items=( )
         eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
-        for region in ${regions[@]} ; do
+        for region in "${regions[@]}" ; do
             local item
             case ${serial} in
                 t)
@@ -186,19 +186,19 @@ function print_table_header() {
 
     if [[ ${csv} == nil ]]; then
         printf "%-${tw}s" "TABLE"
-        for region in ${regions[@]}; do
+        for region in "${regions[@]}"; do
             printf "%${rw}s" ${region^^}
         done
     else
         echo -n "TABLE"
-        for region in ${regions[@]}; do echo -n ",${region^^}"; done
+        for region in "${regions[@]}"; do echo -n ",${region^^}"; done
     fi
     echo
 }
 
 function print_item_counts() {
     if [[ ${csv} == nil ]]; then
-        for region in ${regions[@]} ; do
+        for region in "${regions[@]}" ; do
             if [[ ! -v items[${region}] ]]; then
                 printf "%${rw}s" "-"
             else
@@ -206,7 +206,7 @@ function print_item_counts() {
             fi
         done
     else
-        for region in ${regions[@]} ; do
+        for region in "${regions[@]}" ; do
             if [[ ! -v items[${region}] ]]; then
                 echo -n ,-
             else
