@@ -5,7 +5,7 @@ Miscellaneous AWS scripts
 
 Bash script to query the item count in DynamoDB tables across multiple AWS regions and output it in tabular format.
 
-Bash version 4.3 or later, the AWS CLI tool, and the [jq](https://stedolan.github.io/jq/) tool are required. [GNU Parallel](https://www.gnu.org/software/parallel/) is optional.
+Bash version 4.0 or later, the AWS CLI tool, and the [jq](https://stedolan.github.io/jq/) tool are required. [GNU Parallel](https://www.gnu.org/software/parallel/) is optional.
 
 ### Usage
 
