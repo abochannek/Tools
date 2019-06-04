@@ -59,14 +59,14 @@ function main() {
 
 
     declare -i rw tw
-    if [[ ${serial} == nil && ! -x $(which parallel) ]]; then
+    if [[ ${serial} == nil && ! -x $(command -v parallel) ]]; then
         serial=t
     fi
     fetch_print_items
 }
 
 function check_aws() {
-    if [[ -x "$(which aws)" ]]; then
+    if [[ -x $(command -v aws) ]]; then
         while IFS= read -r; do
             if [[ ${REPLY} =~ _key[[:space:]]+'<not set>' ]]; then
                 echo 'ERROR: AWS CLI tool not configured with credentials' 1>&2
@@ -89,7 +89,7 @@ function check_aws() {
         fi
         exit 128
     fi
-    if [[ ! -x "$(which jq)" ]]; then
+    if [[ ! -x $(command -v jq) ]]; then
         exec 1>&2
         echo "ERROR: $0 requires the jq tool to be installed"
         eval "$(m4 -D TOOL=jq <<< ${MACOS_ERROR_MACRO})"
