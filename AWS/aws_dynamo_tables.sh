@@ -118,7 +118,7 @@ function fetch_tables() {
         # regions_by_table is structured for output
         # tables_by_region is optimized for parallel item fetching
         tables_by_region[${region}]=${list}
-        for table in ${list[@]}; do
+        for table in ${list}; do
             regions_by_table[${table}]+="${region} "
         done
     done
@@ -130,7 +130,7 @@ function fetch_print_items() {
     if [[ ${serial} == nil ]]; then
         local -A tables_and_items_by_region=( )
         echo "Please wait..." 1>&2
-        for region in ${!tables_by_region[@]}; do
+        for region in "${!tables_by_region[@]}"; do
             tables_and_items_by_region[${region}]=$(parallel --will-cite --jobs 0 --keep-order \
                 'aws --output json --region '${region}' dynamodb describe-table \
                      --table-name {} | jq --raw-output ".Table|(.TableName,.ItemCount)"' \
@@ -138,7 +138,7 @@ function fetch_print_items() {
         done
     fi
     print_table_header
-    for table in $(tr ' ' '\n' <<<  ${!regions_by_table[@]} | sort); do
+    for table in $(tr ' ' '\n' <<<  "${!regions_by_table[@]}" | sort); do
         local -A items=( )
         eval $(m4 -D CSV=${csv} <<< ${TABLE_NAME_PRINT_MACRO})
         for region in "${regions[@]}" ; do
