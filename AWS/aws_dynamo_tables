@@ -33,7 +33,7 @@ function usage() {
 }
 
 declare -a regions=()
-declare serial=nil csv=nil
+declare serial=nil csv=nil rflag=nil
 while getopts ":SCapr:" options; do
   case ${options} in
     S) serial=t ;;
@@ -44,7 +44,7 @@ while getopts ":SCapr:" options; do
     *) usage ;;
   esac
 done
-if [[ -v rflag ]]; then
+if [[ ${rflag} == t ]]; then
   shift $((OPTIND - 2))
   regions=("$@")
 fi
@@ -73,8 +73,7 @@ function check_aws() {
       fi
       if [[ ! -v regions && ${REPLY} =~ region ]]; then
         if [[ ! ${REPLY} =~ None$ ]]; then
-          set -- "${REPLY}"
-          regions=$2
+          regions=$(awk '{print $2}' <<<"${REPLY}")
         else
           usage
         fi
