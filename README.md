@@ -16,3 +16,7 @@ Miscellaneous AWS scripts.
 ## dc
 
 dc scripts.
+
+## pomo
+
+Simple Pomodoro timer tool in Bash and X.
