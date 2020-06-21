@@ -11,7 +11,7 @@ function sleep_timer() {
 }
 
 function time_left () {
-  finish_time=$(dateutils.dadd -i %s ${start_time} +$((response * 60 ))s)
+  finish_time=$(dateutils.dadd -i %s ${start_time} +$((response * 60))s)
   time_left=$(dateutils.ddiff -f%Mm%0Ss now ${finish_time})
   case ${response} in
     25) time_message="${buttons%%,*}" ;;
@@ -21,7 +21,7 @@ function time_left () {
   time_message+=$'\n\n'
   time_message+="Time Left: ${time_left}"
   time_message+=$'\n\n'
-  xmessage -center -timeout 30 -name "Pomodoro" "${time_message}"
+  xmessage -name pomo -title "Pomodoro" -center -timeout 30 "${time_message}"
 }
 
 function check_required() {
@@ -40,6 +40,10 @@ function main() {
   let count{25,5,30}=0 # poms, sbreaks, lbreaks
   let terms=0
 
+  if ! xrdb -q | grep -q pomo; then
+      xrdb -merge - <<< 'pomo*font: 10x20'
+  fi
+
   while true; do
     message=$'Start Pomodoro\n\nPomodoros:\t\t'
     message+="${count25}"
@@ -51,13 +55,14 @@ function main() {
     message+="${terms}"
     message+=$'\n\n'
 
-    response=$(xmessage -center -name "Pomodoro" -print -buttons "${buttons}" "${message}"|cut -d\  -f1)
+    response=$(xmessage -name pomo -title "Pomodoro" -center -print \
+                        -buttons "${buttons}" "${message}"|cut -d\  -f1)
 
     case ${response} in
       25|5|30)
         ((count${response}++))
         start_time=$(date -u +%s)
-        coproc sleep_timer $((response * 60 ))
+        coproc sleep_timer $((response * 60))
         ;;
       End)
         grep : <<<"${message}"
