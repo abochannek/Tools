@@ -9,7 +9,7 @@
 set -o pipefail
 
 if ! { type -p hexdump && type -p iconv; } >/dev/null; then
-    printf "%sCan't find hexdump or iconv%s\n" "$b" "$o"
+    printf "Can't find hexdump or iconv\n"
     exit 127
 fi
 
