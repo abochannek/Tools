@@ -1,7 +1,7 @@
 # AWS
 Miscellaneous AWS scripts
 
-## aws_dynamo_tables.sh
+## aws_dynamo_tables
 
 Bash script to query the item count in DynamoDB tables across multiple AWS regions and output it in tabular format.
 

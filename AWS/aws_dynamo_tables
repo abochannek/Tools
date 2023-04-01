@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  aws_dynamo_tables.sh [ -S ] [-C ] [ -a ] [ -p ] [ -r regions ]
+#  aws_dynamo_tables [ -S ] [-C ] [ -a ] [ -p ] [ -r regions ]
 #
 #  -S query serially
 #  -C CSV output

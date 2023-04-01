@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#
+# ucs-codepoint
+#
+# Prompt for character or string and return UCS code point(s).
+#
+# iconv and hexdump required
+#
+set -o pipefail
+
+if ! { type -p hexdump && type -p iconv; } >/dev/null; then
+    printf "%sCan't find hexdump or iconv%s\n" "$b" "$o"
+    exit 127
+fi
+
+ucs_convert () {
+    printf "%s" "$@" | iconv -t UCS-4LE 2>/dev/null | \
+	hexdump -v -e '"U+%04X" " "' 2>/dev/null
+}
+
+term_setup () {
+    # Set up terminal
+    if 2>/dev/null tput -S <<- EOF
+	bold
+	sgr0
+EOF
+    then
+	b=$(tput bold) && o=$(tput sgr0)
+    fi
+}
+
+main() {
+    printf "%sControl-C to exit%s\n" "$b" "$o"
+    prompt=$(printf "%sEnter character or string:%s " "$b" "$o")
+    while read -re -p "$prompt"; do
+	if unicode=$(ucs_convert "$REPLY"); then
+	    if [[ "$unicode" ]]; then
+		printf "%sUnicode:%s %s\n" "$b" "$o" "$unicode"
+	    fi
+	else
+	    printf "%sConversion error%s\n" "$b" "$o"
+	fi
+    done
+}
+
+# Non-interactive
+if [[ $# -gt 0 ]]; then
+    for string; do
+	ucs_convert "$string"
+    done
+    echo && exit 0
+else
+    term_setup && main
+fi
+
+exit 0
