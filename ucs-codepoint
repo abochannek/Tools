@@ -14,8 +14,8 @@ if ! { type -p hexdump && type -p iconv; } >/dev/null; then
 fi
 
 ucs_convert () {
-    printf "%s" "$@" | iconv -t UCS-4LE 2>/dev/null | \
-	hexdump -v -e '"U+%04X" " "' 2>/dev/null
+    printf "%s" "$@" |
+	{ iconv -t UCS-4LE | hexdump -v -e '"U+%04X" " "'; } 2>/dev/null
 }
 
 term_setup () {
