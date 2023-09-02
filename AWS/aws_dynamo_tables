@@ -14,12 +14,14 @@
 MACOS_ERROR_MACRO='ifelse(index('${MACHTYPE#*-}',apple),0,
                    echo On macOS consider \"brew install TOOL\")'
 # shellcheck disable=SC2016
-TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,echo -n ${table},
+TABLE_NAME_PRINT_MACRO='ifelse(CSV,t,printf "%s" ${table},
                         printf "%-${tw}s" ${table})'
+
+script="${0##*/}"
 
 if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
   exec 1>&2
-  echo "ERROR: $0 requires GNU bash version 4.0 or later"
+  printf "ERROR: %s requires GNU bash version 4.0 or later\n" "$script"
   eval "$(m4 -D TOOL=bash <<<"${MACOS_ERROR_MACRO}")"
   exit 128
 fi
@@ -27,8 +29,9 @@ fi
 declare -a all_regions=(us-east-1 eu-central-1 ap-southeast-1 us-west-2)
 declare -a prod_regions=(us-east-1 eu-central-1 ap-southeast-1)
 
-function usage() {
-  echo "Usage: $0 [ -S ] [ -C ] [ -a ] [ -p ] [ -r regions ]" 1>&2
+usage() {
+  printf  "Usage: %s [ -S ] [ -C ] [ -a ] [ -p ] [ -r regions ]\n" \
+          "$script" 1>&2
   exit 1
 }
 
@@ -49,7 +52,7 @@ if [[ ${rflag} == t ]]; then
   regions=("$@")
 fi
 
-function main() {
+main() {
   check_aws
   check_regions
 
@@ -64,7 +67,7 @@ function main() {
   fetch_print_items
 }
 
-function check_aws() {
+check_aws() {
   if [[ -x $(command -v aws) ]]; then
     while IFS= read -r; do
       if [[ ${REPLY} =~ _key[[:space:]]+'<not set>' ]]; then
@@ -81,7 +84,7 @@ function check_aws() {
     done < <(aws configure list | tail +3)
   else
     exec 1>&2
-    echo "ERROR: $0 requires the AWS CLI tool to be installed"
+    printf "ERROR: %s requires the AWS CLI tool to be installed\n" "$script"
     if [[ ${MACHTYPE} =~ apple|linux ]]; then
       echo 'Install the AWS CLI tool using "pip install awscli"'
     fi
@@ -89,13 +92,13 @@ function check_aws() {
   fi
   if [[ ! -x $(command -v jq) ]]; then
     exec 1>&2
-    echo "ERROR: $0 requires the jq tool to be installed"
+    printf  "ERROR: %s requires the jq tool to be installed\n" "$script"
     eval "$(m4 -D TOOL=jq <<<"${MACOS_ERROR_MACRO}")"
     exit 128
   fi
 }
 
-function check_regions() {
+check_regions() {
   mapfile < <(aws --output json ec2 describe-regions |
     jq --raw-output ".Regions[].RegionName")
   for region in "${regions[@]}"; do
@@ -106,7 +109,7 @@ function check_regions() {
   done
 }
 
-function fetch_tables() {
+fetch_tables() {
   echo "Retrieving AWS DynamoDB tables..." 1>&2
   for region in "${regions[@]}"; do
     local list
@@ -122,7 +125,7 @@ function fetch_tables() {
   done
 }
 
-function fetch_print_items() {
+fetch_print_items() {
   # If parallel, prefetch all tables and fill in output array later
   # If serial, fill in the output array one item at a time
   if [[ ${serial} == nil ]]; then
@@ -162,7 +165,7 @@ function fetch_print_items() {
   done
 }
 
-function print_table_header() {
+print_table_header() {
   local table_keys=${!regions_by_table[*]}
   eval "$(echo "r " "${regions[@]}" ";t " "${table_keys[@]}" |
     awk 'BEGIN {rw=0; tw=0}
@@ -178,7 +181,7 @@ function print_table_header() {
                    rw=size()
                    # expect >10^9 items
                    rw=(rw<14?14:rw)
-                   }            
+                   }
              /^t / {tw=size()}
              END {
                   printf "rw=%d tw=%d\n", ++rw, ++tw
@@ -190,13 +193,13 @@ function print_table_header() {
       printf "%${rw}s" "${region^^}"
     done
   else
-    echo -n "TABLE"
-    for region in "${regions[@]}"; do echo -n ",${region^^}"; done
+    printf "TABLE"
+    for region in "${regions[@]}"; do printf ",%s" "${region^^}"; done
   fi
   echo
 }
 
-function print_item_counts() {
+print_item_counts() {
   if [[ ${csv} == nil ]]; then
     for region in "${regions[@]}"; do
       if [[ ! -v items[${region}] ]]; then
@@ -208,9 +211,9 @@ function print_item_counts() {
   else
     for region in "${regions[@]}"; do
       if [[ ! -v items[${region}] ]]; then
-        echo -n ,-
+        printf ",-"
       else
-        echo -n ",${items[${region}]}"
+        printf ",%s" "${items[${region}]}"
       fi
     done
   fi
