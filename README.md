@@ -24,3 +24,7 @@ Simple Pomodoro timer tool in Bash and X.
 ## ucs-codepoint
 
 Tool to convert strings to UCS code points.
+
+## emacs
+
+ELisp code.
